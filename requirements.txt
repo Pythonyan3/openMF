@@ -1,0 +1,7 @@
+click==7.1.2
+numpy==1.18.4
+Pillow==7.1.2
+PyQt5==5.13.0
+PyQt5-sip==12.7.2
+pyqt5-tools==5.13.0.1.5
+python-dotenv==0.13.0
