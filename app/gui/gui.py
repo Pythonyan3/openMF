@@ -13,39 +13,62 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         self.ui = UiOpenMFWindow()
         self.ui.setupUi(self)
         self.scene = None
-        self.rotateX = 0
-        self.rotateY = 0
-        self.rotateZ = 0
         self.ui.scene_label.resizeEvent = self.labelResizeEvent
-        self.ui.rotateX.valueChanged.connect(self.rotate)
-        self.ui.rotateY.valueChanged.connect(self.rotate)
-        self.ui.rotateZ.valueChanged.connect(self.rotate)
+        self.ui.rotateXslider.valueChanged.connect(self.rotate)
+        self.ui.rotateYslider.valueChanged.connect(self.rotate)
+        self.ui.rotateZslider.valueChanged.connect(self.rotate)
         self.ui.scene_label.mousePressEvent = self.mouse_press
         self.ui.scene_label.mouseReleaseEvent = self.mouse_release
+        self.ui.objectsBox.currentTextChanged.connect(self.select_object)
+        self.ui.removeObject.clicked.connect(self.remove_object)
+        self.ui.scaleButton.clicked.connect(self.scale)
+        self.ui.moveButton.clicked.connect(self.move)
 
     def showEvent(self, *args, **kwargs):
         if not self.scene:
             self.scene = Scene(self.ui.scene_label.width(), self.ui.scene_label.height())
-            box = Box(Point(0, 0, 0), 150, 10, 60)
-            box2 = Box(Point(0, 10, 0), 130, 10, 40)
-            box3 = Box(Point(-32, 65, 0), 30, 100, 30)
-            box4 = Box(Point(32, 65, 0), 30, 100, 30)
-            self.scene.triangles = box.triangles() + box2.triangles() + box3.triangles() + box4.triangles()
-            self.scene.render()
-            qimage = ImageQt(self.scene.image).rgbSwapped().rgbSwapped()
-            self.ui.scene_label.setPixmap(QPixmap.fromImage(qimage))
+            self.ui.objectsBox.addItems(self.scene.objects.keys())
+            self.redraw()
 
     def rotate(self, deg: int):
         sender = self.sender()
-        if sender.objectName() == 'rotateX':
-            self.scene.rotate(self.rotateX - deg, 'x')
-            self.rotateX = deg
-        if sender.objectName() == 'rotateY':
-            self.scene.rotate(self.rotateY - deg, 'y')
-            self.rotateY = deg
-        if sender.objectName() == 'rotateZ':
-            self.scene.rotate(self.rotateZ - deg, 'z')
-            self.rotateZ = deg
+        if sender.objectName() == 'rotateXslider':
+            self.scene.rotate(deg, 'x')
+        if sender.objectName() == 'rotateYslider':
+            self.scene.rotate(deg, 'y')
+        if sender.objectName() == 'rotateZslider':
+            self.scene.rotate(deg, 'z')
+        self.redraw()
+
+    def scale(self):
+        self.scene.scale(self.ui.scaleBoxX.value(), self.ui.scaleBoxY.value(), self.ui.scaleBoxZ.value())
+        self.redraw()
+
+    def move(self):
+        self.scene.move(self.ui.moveBoxX.value(), self.ui.moveBoxY.value(), self.ui.moveBoxZ.value())
+        self.redraw()
+
+    def select_object(self, name):
+        if name:
+            self.scene.select(name)
+            self.ui.rotateXslider.setValue(self.scene.selected_obj.rotate_x)
+            self.ui.rotateYslider.setValue(self.scene.selected_obj.rotate_y)
+            self.ui.rotateZslider.setValue(self.scene.selected_obj.rotate_z)
+            self.ui.scaleBoxX.setValue(self.scene.selected_obj.scale_x)
+            self.ui.scaleBoxY.setValue(self.scene.selected_obj.scale_y)
+            self.ui.scaleBoxZ.setValue(self.scene.selected_obj.scale_z)
+            self.ui.moveBoxX.setValue(self.scene.selected_obj.x)
+            self.ui.moveBoxY.setValue(self.scene.selected_obj.y)
+            self.ui.moveBoxZ.setValue(self.scene.selected_obj.z)
+            self.redraw()
+
+    def remove_object(self):
+        if self.ui.objectsBox.currentText():
+            self.scene.remove(self.ui.objectsBox.currentText())
+            self.ui.objectsBox.removeItem(self.ui.objectsBox.currentIndex())
+            self.redraw()
+
+    def redraw(self):
         self.scene.render()
         qimage = ImageQt(self.scene.image).rgbSwapped().rgbSwapped()
         self.ui.scene_label.setPixmap(QPixmap.fromImage(qimage))
@@ -54,10 +77,9 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         self.ui.scene_label.setCursor(QCursor(Qt.ClosedHandCursor))
 
     def mouse_release(self, event):
-        self.ui.scene_label.setCursor(QCursor(Qt.OpenHandCursor))
+        self.ui.scene_label.setCursor(QCursor(Qt.ArrowCursor))
 
     def labelResizeEvent(self, *args, **kwargs):
         if self.scene:
             self.scene.resize(self.ui.scene_label.width(), self.ui.scene_label.height())
-            qimage = ImageQt(self.scene.image).rgbSwapped().rgbSwapped()
-            self.ui.scene_label.setPixmap(QPixmap.fromImage(qimage))
+            self.redraw()

@@ -2,12 +2,15 @@ from app.GObjects.Primitives import Point, Triangle
 
 
 class Shape:
-    pass
+    def __init__(self, x, y, z):
+        self.x, self.y, self.z = x, y, z
+        self.rotate_x, self.rotate_y, self.rotate_z = 0, 0, 0
+        self.scale_x, self.scale_y, self.scale_z = 1, 1, 1
 
 
 class Box(Shape):
-    def __init__(self, start_point: Point, width: int, height: int, length: int):
-        self.s_point = start_point
+    def __init__(self, x: float, y: float, z: float, width: int, height: int, length: int):
+        super().__init__(x, y, z)
         self.length = length
         self.width = width
         self.height = height
@@ -15,8 +18,8 @@ class Box(Shape):
     def triangles(self):
         triangles = list()
         half_w, half_h, half_l = int(self.width / 2), int(self.height / 2), int(self.length / 2)
-        x0, y0, z0 = self.s_point.x - half_w, self.s_point.y - half_h, self.s_point.z - half_l
-        x1, y1, z1 = self.s_point.x + half_w, self.s_point.y + half_h, self.s_point.z + half_l
+        x0, y0, z0 = - half_w, - half_h, - half_l
+        x1, y1, z1 = half_w, half_h, half_l
         """Front Face"""
         triangles.append(Triangle(Point(x0, y0, z0), Point(x1, y1, z0), Point(x0, y1, z0)))
         triangles.append(Triangle(Point(x0, y0, z0), Point(x1, y1, z0), Point(x1, y0, z0)))
