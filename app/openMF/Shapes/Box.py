@@ -1,11 +1,6 @@
-from app.GObjects.Primitives import Point, Triangle
-
-
-class Shape:
-    def __init__(self, x, y, z):
-        self.x, self.y, self.z = x, y, z
-        self.rotate_x, self.rotate_y, self.rotate_z = 0, 0, 0
-        self.scale_x, self.scale_y, self.scale_z = 1, 1, 1
+from app.openMF.Shapes.Point import Point
+from app.openMF.Shapes.Shape import Shape
+from app.openMF.Shapes.Triangle import Triangle
 
 
 class Box(Shape):
@@ -15,9 +10,12 @@ class Box(Shape):
         self.width = width
         self.height = height
 
+    def get_params(self):
+        return str(self.width) + ' ' + str(self.height) + ' ' + str(self.length) + '\n'
+
     def triangles(self):
         triangles = list()
-        half_w, half_h, half_l = int(self.width / 2), int(self.height / 2), int(self.length / 2)
+        half_w, half_h, half_l = self.width / 2, self.height / 2, self.length / 2
         x0, y0, z0 = - half_w, - half_h, - half_l
         x1, y1, z1 = half_w, half_h, half_l
         """Front Face"""
