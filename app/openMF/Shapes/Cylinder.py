@@ -12,7 +12,7 @@ class Cylinder(Shape):
         self.height = height
 
     def get_params(self):
-        return str(self.radius) + ' ' + str(self.height) + '\n'
+        return 'Cylinder_params: ' + str(self.radius) + ' ' + str(self.height) + '\n'
 
     def triangles(self):
         img = Image.new('RGB', (800, 800), 'black')

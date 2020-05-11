@@ -31,11 +31,17 @@ class Point:
         return Point(A[0], A[1], A[2])
 
     def __add__(self, other):
-        result = self.point + other
+        if isinstance(other, Point):
+            result = self.point + other.point
+        else:
+            result = self.point + other
         return Point(result[0], result[1], result[2])
 
     def __sub__(self, other):
-        result = self.point - other
+        if isinstance(other, Point):
+            result = self.point - other.point
+        else:
+            result = self.point - other
         return Point(result[0], result[1], result[2])
 
     def normilize(self):

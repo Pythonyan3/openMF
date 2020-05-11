@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from app.gui.gui import OpenMFWindow
+from app.gui.openMFController import OpenMFWindow
 import sys
 
 

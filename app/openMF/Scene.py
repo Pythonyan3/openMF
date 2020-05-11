@@ -16,7 +16,7 @@ class Scene:
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        self.camera = Camera([0, 0, 1], [0, 0, 0], 90, 0.1, 100)
+        self.camera = Camera(Point.Point(0.0, 0.0, 1.0), Point.Point(0.0, 0.0, 0.0), 90, 0.1, 100)
         self.objects = dict()
         self.objects['RaGates'] = MFObject.MFObject(0, 0, 0)
         self.objects['box'] = Box.Box(0, -100, 0, 50, 50, 50)
@@ -31,13 +31,13 @@ class Scene:
         self.objects.pop(name)
         self.selected_obj = self.objects[new_name] if new_name else None
 
-    def resize(self, width, height):
+    def resize_scene(self, width, height):
         self.width = width
         self.height = height
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
 
-    def rotate(self, deg, axis):
+    def rotate_object(self, deg, axis):
         if self.selected_obj:
             if axis == 'x':
                 self.selected_obj.rotate_x = deg
@@ -46,13 +46,13 @@ class Scene:
             else:
                 self.selected_obj.rotate_z = deg
 
-    def scale(self, scale_x, scale_y, scale_z):
+    def scale_object(self, scale_x, scale_y, scale_z):
         if self.selected_obj:
             self.selected_obj.scale_x = scale_x
             self.selected_obj.scale_y = scale_y
             self.selected_obj.scale_z = scale_z
 
-    def move(self, x, y, z):
+    def move_object(self, x, y, z):
         if self.selected_obj:
             self.selected_obj.x = x
             self.selected_obj.y = y
@@ -67,22 +67,11 @@ class Scene:
     def fill_render(self):
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
-        for obj in self.objects.values():
-            rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
-            tranlsate = Matrix.tranlsation_matrix(obj.x, obj.y, obj.z)
-            triangles = obj.triangles()
-            zBuffer = [-math.inf for x in range(self.width * self.height)]
-            for t in triangles:
-                tt = t.sort() * (rotate.dot(tranlsate))
-                self.fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, zBuffer)
-
-    def line_render(self):
-        self.image = Image.new('RGB', (self.width, self.height), 'black')
-        self.canvas = self.image.load()
+        self.camera.rotate_around_center()
         projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
                                                self.camera.far)
-        #look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
-        look = Matrix.sec_look_at_matrix(self.camera.eye, self.camera.pitch, self.camera.yaw)
+        look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
+        #look = Matrix.sec_look_at_matrix(self.camera.eye, self.camera.pitch, self.camera.yaw)
         for obj in self.objects.values():
             color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
             obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
@@ -97,6 +86,36 @@ class Scene:
                     for t in triangles:
                         model = (scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate))
                         tt = t * (model.dot(look).dot(projection))
+                        self.fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, color)
+            else:
+                triangles = obj.triangles()
+                for t in triangles:
+                    model = (obj_scale.dot(obj_rotate).dot(obj_translate))
+                    tt = t * (model.dot(look).dot(projection))
+                    self.fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, color)
+
+    def line_render(self):
+        self.image = Image.new('RGB', (self.width, self.height), 'black')
+        self.canvas = self.image.load()
+        self.camera.rotate()
+        projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
+                                               self.camera.far)
+        look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
+        #look = Matrix.sec_look_at_matrix(self.camera.eye, self.camera.pitch, self.camera.yaw)
+        for obj in self.objects.values():
+            color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
+            obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
+            obj_translate = Matrix.tranlsation_matrix(obj.x, obj.y, obj.z)
+            obj_scale = Matrix.scale_matrix(obj.scale_x, obj.scale_y, obj.scale_z)
+            if isinstance(obj, MFObject.MFObject):
+                for shape in obj.shapes:
+                    rotate = Matrix.rotate(shape.rotate_x, shape.rotate_y, shape.rotate_z)
+                    translate = Matrix.tranlsation_matrix(shape.x, shape.y, shape.z)
+                    scale = Matrix.scale_matrix(shape.scale_x, shape.scale_y, shape.scale_z)
+                    triangles = shape.triangles()
+                    for t in triangles:
+                        model = scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate)
+                        tt = t * (model.dot(look).dot(projection))
                         self.line(tt.a.x, tt.a.y, tt.b.x, tt.b.y, color)
                         self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
                         self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
@@ -109,7 +128,7 @@ class Scene:
                     self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
                     self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
 
-    def fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, zBuffer, color):
+    def fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, color):
         if y0 == y1 and y0 == y2:
             return
         x0, x1, x2 = self.width/2 + x0, self.width/2 + x1, self.width/2 + x2
@@ -122,18 +141,18 @@ class Scene:
             alpha = float(i / total_height)
             h = y1-y0 if second_half else 0
             beta = float((i-h)/segment_height)
-            a = Point.Point(x0+(x2-x0) * alpha, y0+(y2-y0) * alpha, 0)
-            b = Point.Point(x1+(x2-x1) * beta, y0+(y2-y0) * beta, 0) if second_half else Point.Point(x0+(x1-x0) * beta, y0+(y1-y0) * beta, 0)
+            a = Point.Point(x0+(x2-x0) * alpha, y0+(y2-y0) * alpha, z0+(z2-z0)*alpha)
+            b = Point.Point(x1+(x2-x1) * beta, y0+(y2-y0) * beta, z0+(z2-z0) * beta) if second_half else Point.Point(x0+(x1-x0) * beta, y0+(y1-y0) * beta, z0+(z1-z0) * beta)
             if a.x > b.x:
                 a, b = b, a
             j = a.x
             while j <= b.x:
-                phi = 1.0 if b.x == a.x else float((j-a.x)/(b.x-a.x))
-                P = a + (b-a)*phi
-                ind = int(P.x + P.y*self.width)
-                if zBuffer[ind] < P.z:
-                    self.canvas[j, y0+i] = color
-                    zBuffer[int((y0+i)*self.width + j)] = P.z
+                #phi = 1.0 if b.x == a.x else float((j-a.x)/(b.x-a.x))
+                #P = a + (b-a)*phi
+                #ind = int(P.x + P.y*self.width)
+                #if zBuffer[ind] < P.z:
+                self.canvas[j, y0+i] = color
+                    #zBuffer[int((y0+i)*self.width + j)] = P.z
                 j += 1
             i += 1
 
@@ -185,57 +204,75 @@ class Scene:
                 error -= dx*2
             x += 1
 
-    def save_object(self, filename, obj_name):
-        obj = self.selected_obj
+    def save_object(self, filename):
         with open(filename, 'w') as file:
-            if isinstance(obj, MFObject.MFObject):
-                file.write(obj.__class__.__name__ + ' ' + obj_name + '\n')
-                file.write(obj.get_modifications())
-                for shape in obj.shapes:
-                    file.write(shape.__class__.__name__ + ' ' + obj_name + '\n')
-                    file.write(shape.get_params())
-                    file.write(shape.get_modifications())
-            else:
-                file.write(obj.__class__.__name__ + ' ' + obj_name + '\n')
-                file.write(obj.get_params())
-                file.write(obj.get_modifications())
+            file.write(f'camera-eye: {self.camera.eye.x} {self.camera.eye.y} {self.camera.eye.z}\n' )
+            file.write(f'camera-center: {self.camera.center.x} {self.camera.center.y} {self.camera.center.z}\n')
+            file.write(f'camera-fov-near-far: {self.camera.fov} {self.camera.near} {self.camera.far}\n')
+            file.write(f'camera-rotate: {self.camera.rotate_x} {self.camera.rotate_y}\n')
+            for name, obj in self.objects.items():
+                if isinstance(obj, MFObject.MFObject):
+                    file.write(obj.__class__.__name__ + ' ' + name + ' ' + str(len(obj)) + '\n')
+                    file.write(obj.get_modifications())
+                    for shape in obj.shapes:
+                        file.write(shape.__class__.__name__ + ' ' + name + ' 1\n')
+                        file.write(shape.get_params())
+                        file.write(shape.get_modifications())
+                else:
+                    file.write(obj.__class__.__name__ + ' ' + name + ' 1\n')
+                    file.write(obj.get_params())
+                    file.write(obj.get_modifications())
 
     def load_object(self, filename):
         try:
+            objects3d = dict()
             with open(filename, 'r') as file:
-                lines = file.readlines()
-            class_name, name = lines[0].strip('\n').split(' ')
-            if class_name == 'MFObject':
-                x, y, z = lines[1].strip('\n').split(' ')
-                rotate_x, rotate_y, rotate_z = lines[2].strip('\n').split(' ')
-                scale_x, scale_y, scale_z = lines[3].strip('\n').split(' ')
-                obj = MFObject.MFObject(float(x), float(y), float(z))
-                obj.rotate_x, obj.rotate_y, obj.rotate_z = int(rotate_x), int(rotate_y), int(rotate_z)
-                obj.scale_x, obj.scale_y, obj.scale_z = float(scale_x), float(scale_y), float(scale_z)
-                for i in range(4, len(lines), 5):
-                    class_name, shape_name = lines[i].strip('\n').split(' ')
-                    params = [int(x) for x in lines[i+1].strip('\n').split(' ')]
-                    x, y, z = lines[i+2].strip('\n').split(' ')
-                    rotate_x, rotate_y, rotate_z = lines[i+3].strip('\n').split(' ')
-                    scale_x, scale_y, scale_z = lines[i+4].strip('\n').split(' ')
-                    shape = SHAPES[class_name](float(x), float(y), float(z), *params)
-                    shape.rotate_x, shape.rotate_y, shape.rotate_z = int(rotate_x), int(rotate_y), int(rotate_z)
-                    shape.scale_x, shape.scale_y, shape.scale_z = float(scale_x), float(scale_y), float(scale_z)
-                    obj.append(shape)
-                self.objects[name] = obj
-                return True
-            else:
-                params = [int(x) for x in lines[1].strip('\n').split(' ')]
-                x, y, z = lines[2].strip('\n').split(' ')
-                rotate_x, rotate_y, rotate_z = lines[3].strip('\n').split(' ')
-                scale_x, scale_y, scale_z = lines[4].strip('\n').split(' ')
-                obj = SHAPES[class_name](float(x), float(y), float(z), *params)
-                obj.rotate_x, obj.rotate_y, obj.rotate_z = int(rotate_x), int(rotate_y), int(rotate_z)
-                obj.scale_x, obj.scale_y, obj.scale_z = float(scale_x), float(scale_y), float(scale_z)
-                self.objects[name] = obj
+                x, y, z = file.readline().strip('\n').split(' ')[1:]
+                eye = Point.Point(float(x), float(y), float(z))
+                x, y, z = file.readline().strip('\n').split(' ')[1:]
+                center = Point.Point(float(x), float(y), float(z))
+                fov, near, far = file.readline().strip('\n').split(' ')[1:]
+                camera = Camera(eye, center, int(fov), float(near), float(far))
+                rotate_x, rotate_y = file.readline().strip('\n').split(' ')[1:]
+                camera.rotate_x, camera.rotate_y = int(rotate_x), int(rotate_y)
+                while True:
+                    line = file.readline()
+                    if not line:
+                        break
+                    class_name, name, count = line.strip('\n').split(' ')
+                    if class_name == 'MFObject':
+                        obj = self.read_object(file)
+                        objects3d[name] = obj
+                    else:
+                        shape = self.read_shape(file, class_name)
+                        if objects3d.get(name) is not None:
+                            objects3d[name].append(shape)
+                        else:
+                            objects3d[name] = shape
+                self.objects = objects3d
+                self.camera = camera
                 return True
         except TypeError:
             return False
+
+    def read_object(self, file):
+        x, y, z = file.readline().strip('\n').split(' ')[1:]
+        rotate_x, rotate_y, rotate_z = file.readline().strip('\n').split(' ')[1:]
+        scale_x, scale_y, scale_z = file.readline().strip('\n').split(' ')[1:]
+        obj = MFObject.MFObject(float(x), float(y), float(z))
+        obj.rotate_x, obj.rotate_y, obj.rotate_z = float(rotate_x), float(rotate_y), float(rotate_z)
+        obj.scale_x, obj.scale_y, obj.scale_z = float(scale_x), float(scale_y), float(scale_z)
+        return obj
+
+    def read_shape(self, file, class_name):
+        shape_params = [int(x) for x in file.readline().strip('\n').split(' ')[1:]]
+        x, y, z = file.readline().strip('\n').split(' ')[1:]
+        rotate_x, rotate_y, rotate_z = file.readline().strip('\n').split(' ')[1:]
+        scale_x, scale_y, scale_z = file.readline().strip('\n').split(' ')[1:]
+        shape = SHAPES[class_name](float(x), float(y), float(z), *shape_params)
+        shape.rotate_x, shape.rotate_y, shape.rotate_z = float(rotate_x), float(rotate_y), float(rotate_z)
+        shape.scale_x, shape.scale_y, shape.scale_z = float(scale_x), float(scale_y), float(scale_z)
+        return shape
 
     def show(self):
         self.image.show()

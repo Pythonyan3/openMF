@@ -11,7 +11,7 @@ class Box(Shape):
         self.height = height
 
     def get_params(self):
-        return str(self.width) + ' ' + str(self.height) + ' ' + str(self.length) + '\n'
+        return 'Box_params: ' + str(self.width) + ' ' + str(self.height) + ' ' + str(self.length) + '\n'
 
     def triangles(self):
         triangles = list()

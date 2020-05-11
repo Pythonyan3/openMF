@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>719</width>
+    <height>522</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -153,7 +153,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="manipulatingContainer">
         <item>
          <widget class="QWidget" name="widget" native="true">
@@ -190,27 +190,7 @@
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>img/sphinx.png</normaloff>img/sphinx.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>25</width>
-               <height>25</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="addShape">
-             <property name="styleSheet">
-              <string notr="true">font: 75 10pt &quot;Sitka&quot;;</string>
-             </property>
-             <property name="text">
-              <string>Добавить фигуру</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>img/shapes.png</normaloff>img/shapes.png</iconset>
+               <normaloff>img/new.png</normaloff>img/new.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -240,11 +220,158 @@
              </property>
             </widget>
            </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <widget class="QPushButton" name="Box">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>img/cube-outline.png</normaloff>img/cube-outline.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>img/pyramid.png</normaloff>img/pyramid.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QPushButton" name="pushButton_3">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>img/cylinder.png</normaloff>img/cylinder.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="pushButton">
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>img/cone (1).png</normaloff>img/cone (1).png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>32</width>
+                 <height>32</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="font">
+              <font>
+               <family>Sitka</family>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Позиция камеры</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <family>Sitka</family>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Позиция цели</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_7"/>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_8"/>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="doubleSpinBox_9"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="aroundCenter">
+             <property name="text">
+              <string>Вращение камеры вокруг цели</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="aroundEye">
+             <property name="text">
+              <string>Вращение вокруг оси</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
-         <widget class="QWidget" name="" native="true">
+         <widget class="QWidget" name="widget" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -434,7 +561,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>640</width>
+     <width>719</width>
      <height>21</height>
     </rect>
    </property>

@@ -11,7 +11,7 @@ class TruncatedPyramid(Shape):
         self.height = height
 
     def get_params(self):
-        return str(self.bottom_width) + ' ' + str(self.top_width) + ' ' + str(self.height) + '\n'
+        return 'Pyramid_params: ' + str(self.bottom_width) + ' ' + str(self.top_width) + ' ' + str(self.height) + '\n'
 
     def triangles(self):
         triangles = list()
