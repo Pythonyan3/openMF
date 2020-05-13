@@ -21,7 +21,7 @@ class Cylinder(Shape):
         triangles = list()
         points = []
         half_height = self.height/2
-        deg, step = 270, 360 / 20
+        deg, step = 270, 360 / 12
         while deg <= 360:
             x = self.radius * math.cos(math.radians(deg))
             z = self.radius * math.sin(math.radians(deg))

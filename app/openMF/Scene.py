@@ -3,6 +3,7 @@ from app.openMF.Camera import Camera
 from PIL import Image
 from app.openMF.Matrix import Matrix
 import math
+import numpy as np
 from app.openMF.Shapes import Point, Box, Cylinder, TruncatedPyramid, MFObject
 
 
@@ -18,9 +19,8 @@ class Scene:
         self.height = height
         self.camera = Camera(Point.Point(0.0, 0.0, 1.0), Point.Point(0.0, 0.0, 0.0), 90, 0.1, 100)
         self.objects = dict()
-        self.objects['RaGates'] = MFObject.MFObject(0, 0, 0)
-        self.objects['box'] = Box.Box(0, -100, 0, 50, 50, 50)
-        self.selected_obj = self.objects['RaGates']
+        self.objects['box'] = Box.Box(0, 0, 0, 100, 100, 100)
+        self.selected_obj = self.objects['box']
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
 
@@ -67,11 +67,10 @@ class Scene:
     def fill_render(self):
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
-        self.camera.rotate_around_center()
         projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
                                                self.camera.far)
         look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
-        #look = Matrix.sec_look_at_matrix(self.camera.eye, self.camera.pitch, self.camera.yaw)
+        z_buffer = [-math.inf for _ in range(self.width * self.height)]
         for obj in self.objects.values():
             color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
             obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
@@ -84,24 +83,23 @@ class Scene:
                     scale = Matrix.scale_matrix(shape.scale_x, shape.scale_y, shape.scale_z)
                     triangles = shape.triangles()
                     for t in triangles:
-                        model = (scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate))
+                        model = scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate)
                         tt = t * (model.dot(look).dot(projection))
-                        self.fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, color)
+                        self.new_fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, z_buffer, color)
             else:
                 triangles = obj.triangles()
                 for t in triangles:
                     model = (obj_scale.dot(obj_rotate).dot(obj_translate))
                     tt = t * (model.dot(look).dot(projection))
-                    self.fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, color)
+                    self.new_fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, z_buffer, color)
 
     def line_render(self):
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
-        self.camera.rotate()
         projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
                                                self.camera.far)
         look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
-        #look = Matrix.sec_look_at_matrix(self.camera.eye, self.camera.pitch, self.camera.yaw)
+        viewport = Matrix.viewport_matrix(self.width, self.height)
         for obj in self.objects.values():
             color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
             obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
@@ -128,43 +126,22 @@ class Scene:
                     self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
                     self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
 
-    def fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, color):
-        if y0 == y1 and y0 == y2:
-            return
-        x0, x1, x2 = self.width/2 + x0, self.width/2 + x1, self.width/2 + x2
-        y0, y1, y2 = self.height / 2 + y0, self.height / 2 + y1, self.height / 2 + y2
-        total_height = y2 - y0
-        i = 0
-        while i < total_height:
-            second_half = i > y1-y0 or y1 == y0
-            segment_height = y2-y1 if second_half else y1-y0
-            alpha = float(i / total_height)
-            h = y1-y0 if second_half else 0
-            beta = float((i-h)/segment_height)
-            a = Point.Point(x0+(x2-x0) * alpha, y0+(y2-y0) * alpha, z0+(z2-z0)*alpha)
-            b = Point.Point(x1+(x2-x1) * beta, y0+(y2-y0) * beta, z0+(z2-z0) * beta) if second_half else Point.Point(x0+(x1-x0) * beta, y0+(y1-y0) * beta, z0+(z1-z0) * beta)
-            if a.x > b.x:
-                a, b = b, a
-            j = a.x
-            while j <= b.x:
-                #phi = 1.0 if b.x == a.x else float((j-a.x)/(b.x-a.x))
-                #P = a + (b-a)*phi
-                #ind = int(P.x + P.y*self.width)
-                #if zBuffer[ind] < P.z:
-                self.canvas[j, y0+i] = color
-                    #zBuffer[int((y0+i)*self.width + j)] = P.z
-                j += 1
-            i += 1
-
-    def new_fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, color=(255, 255, 255)):
+    def new_fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, z_buffer, color=(255, 255, 255)):
         x0, x1, x2 = self.width / 2 + x0, self.width / 2 + x1, self.width / 2 + x2
-        y0, y1, y2 = self.height / 2 + y0, self.height / 2 + y1, self.height / 2 + y2
+        y0, y1, y2 = self.height-1-(self.height / 2 + y0), self.height-1-(self.height / 2 + y1), self.height-1-(self.height / 2 + y2)
         minX = int(max(0, math.ceil(min(x0, min(x1, x2)))))
         maxX = int(min(self.width-1, math.floor(max(x0, max(x1, x2)))))
         minY = int(max(0, math.ceil(min(y0, min(y1, y2)))))
         maxY = int(min(self.height - 1, math.floor(max(y0, max(y1, y2)))))
         triangle_area = (y0-y2) * (x1-x2) + (y1-y2) * (x2-x0)
         y = minY
+        ab = np.array([x0, y0, z0]) - np.array([x1, y1, z1])
+        ac = np.array([x0, y0, z0]) - np.array([x2, y2, z2])
+        norm = np.array([ab[1]*ac[2] - ab[2]*ac[1],
+                         ab[2]*ac[0] - ab[0]*ac[2],
+                         ab[0]*ac[1] - ab[1]*ac[0], 1])
+        l = np.linalg.norm(norm)
+        shade = abs(norm[2]/l)
         if triangle_area:
             while y <= maxY:
                 x = minX
@@ -173,7 +150,11 @@ class Scene:
                     b2 = ((y - y0) * (x2 - x0) + (y2 - y0) * (x0 - x)) / triangle_area
                     b3 = ((y - y1) * (x0 - x1) + (y0 - y1) * (x1 - x)) / triangle_area
                     if 0 <= b1 <= 1 and 0 <= b2 <= 1 and 0 <= b3 <= 1:
-                        self.canvas[x, y] = color
+                        depth = b1*z0 + b2*z1 + b3*z2
+                        z_index = y * self.width + x
+                        if z_buffer[z_index] < depth:
+                            self.canvas[x, y] = (int(color[0] * shade), int(color[1] * shade), int(color[2] * shade))
+                            z_buffer[z_index] = depth
                     x += 1
                 y += 1
 

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>img/3d-modeling.png</normaloff>img/3d-modeling.png</iconset>
+    <normaloff>C:/Users/lusfu/.designer/backup/img/3d-modeling.png</normaloff>C:/Users/lusfu/.designer/backup/img/3d-modeling.png</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -100,9 +100,6 @@
               <width>300</width>
               <height>300</height>
              </size>
-            </property>
-            <property name="cursor">
-             <cursorShape>OpenHandCursor</cursorShape>
             </property>
             <property name="text">
              <string/>
@@ -190,7 +187,7 @@
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>img/new.png</normaloff>img/new.png</iconset>
+               <normaloff>C:/Users/lusfu/.designer/backup/img/new.png</normaloff>C:/Users/lusfu/.designer/backup/img/new.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -210,7 +207,7 @@
              </property>
              <property name="icon">
               <iconset>
-               <normaloff>img/eraser.png</normaloff>img/eraser.png</iconset>
+               <normaloff>C:/Users/lusfu/.designer/backup/img/eraser.png</normaloff>C:/Users/lusfu/.designer/backup/img/eraser.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -219,78 +216,6 @@
               </size>
              </property>
             </widget>
-           </item>
-           <item>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="0">
-              <widget class="QPushButton" name="Box">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>img/cube-outline.png</normaloff>img/cube-outline.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QPushButton" name="pushButton_2">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>img/pyramid.png</normaloff>img/pyramid.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QPushButton" name="pushButton_3">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>img/cylinder.png</normaloff>img/cylinder.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="pushButton">
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>img/cone (1).png</normaloff>img/cone (1).png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
            </item>
            <item>
             <widget class="QLabel" name="label">
@@ -311,15 +236,37 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+              <widget class="QDoubleSpinBox" name="eye_x">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+              </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+              <widget class="QDoubleSpinBox" name="eye_y">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+              </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+              <widget class="QDoubleSpinBox" name="eye_z">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="eye_set">
+             <property name="text">
+              <string>Установить</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_2">
@@ -340,15 +287,34 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_7"/>
+              <widget class="QDoubleSpinBox" name="center_x">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+              </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_8"/>
+              <widget class="QDoubleSpinBox" name="center_y">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+              </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="doubleSpinBox_9"/>
+              <widget class="QDoubleSpinBox" name="center_z">
+               <property name="minimum">
+                <double>-99.989999999999995</double>
+               </property>
+              </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="center_set">
+             <property name="text">
+              <string>Установить</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QRadioButton" name="aroundCenter">
@@ -570,38 +536,50 @@
      <string>Меню</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="action_2"/>
-    <addaction name="action_3"/>
+    <addaction name="load_action"/>
+    <addaction name="save_action"/>
     <addaction name="separator"/>
     <addaction name="action_4"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+    <addaction name="rasterize_scene"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
-  <action name="action_2">
+  <action name="load_action">
    <property name="icon">
     <iconset>
-     <normaloff>img/3d-file.png</normaloff>img/3d-file.png</iconset>
+     <normaloff>C:/Users/lusfu/.designer/backup/img/3d-file.png</normaloff>C:/Users/lusfu/.designer/backup/img/3d-file.png</iconset>
    </property>
    <property name="text">
-    <string>Загрузить объект</string>
+    <string>Загрузить сцену</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="save_action">
    <property name="icon">
     <iconset>
-     <normaloff>img/disk.png</normaloff>img/disk.png</iconset>
+     <normaloff>C:/Users/lusfu/.designer/backup/img/disk.png</normaloff>C:/Users/lusfu/.designer/backup/img/disk.png</iconset>
    </property>
    <property name="text">
-    <string>Сохранить объект</string>
+    <string>Сохранить сцену</string>
    </property>
   </action>
   <action name="action_4">
    <property name="icon">
     <iconset>
-     <normaloff>img/logout.png</normaloff>img/logout.png</iconset>
+     <normaloff>C:/Users/lusfu/.designer/backup/img/logout.png</normaloff>C:/Users/lusfu/.designer/backup/img/logout.png</iconset>
    </property>
    <property name="text">
     <string>Выход</string>
+   </property>
+  </action>
+  <action name="rasterize_scene">
+   <property name="text">
+    <string>Растеризировать кадр</string>
    </property>
   </action>
  </widget>

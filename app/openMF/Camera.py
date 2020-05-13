@@ -20,6 +20,13 @@ class Camera:
         else:
             self.rotate_around_eye()
 
+    def move(self, ex, ey, cx, cy):
+        ex, cx = (-ex, -cx) if self.eye.z < 0 else (ex, cx)
+        self.eye.point[0] += ex
+        self.eye.point[1] += ey
+        self.center.point[0] += cx
+        self.center.point[1] += cy
+
     def rotate_around_center(self):
         camera = self.eye - self.center
         r = np.linalg.norm(camera.point)
@@ -28,14 +35,13 @@ class Camera:
         x = r * math.sin(o) * math.cos(f)
         y = r * math.cos(o)
         z = r * math.sin(o) * math.sin(f)
-        z = 0.001 if z == 0.0 else z
         self.eye = self.center + np.array([x, y, z])
 
     def rotate_around_eye(self):
-        camera = self.eye - self.center
+        camera = self.center - self.eye
         r = np.linalg.norm(camera.point)
         f = math.radians(self.rotate_y + 90)
-        o = math.radians(self.rotate_x - 90)
+        o = math.radians(self.rotate_x + 90)
         x = r * math.sin(o) * math.cos(f)
         y = r * math.cos(o)
         z = r * math.sin(o) * math.sin(f)

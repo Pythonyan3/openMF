@@ -54,13 +54,13 @@
          <set>Qt::AlignCenter</set>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>100</number>
         </property>
         <property name="maximum">
          <number>500</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>100</number>
         </property>
        </widget>
       </item>
@@ -86,13 +86,13 @@
          <string/>
         </property>
         <property name="minimum">
-         <number>0</number>
+         <number>60</number>
         </property>
         <property name="maximum">
          <number>500</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>60</number>
         </property>
        </widget>
       </item>
@@ -116,6 +116,9 @@
         </property>
         <property name="specialValueText">
          <string/>
+        </property>
+        <property name="minimum">
+         <number>4</number>
         </property>
         <property name="maximum">
          <number>100</number>
@@ -149,35 +152,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <family>Sitka</family>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Радиус колонн:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="column_radius">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="specialValueText">
-         <string/>
-        </property>
-        <property name="maximum">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="label_5">
         <property name="font">
          <font>
@@ -200,6 +174,9 @@
         </property>
         <property name="specialValueText">
          <string/>
+        </property>
+        <property name="minimum">
+         <number>30</number>
         </property>
         <property name="maximum">
          <number>500</number>
@@ -227,6 +204,9 @@
         <property name="specialValueText">
          <string/>
         </property>
+        <property name="minimum">
+         <number>20</number>
+        </property>
         <property name="maximum">
          <number>500</number>
         </property>
@@ -253,6 +233,9 @@
         <property name="specialValueText">
          <string/>
         </property>
+        <property name="minimum">
+         <number>30</number>
+        </property>
         <property name="maximum">
          <number>500</number>
         </property>
@@ -278,6 +261,9 @@
         </property>
         <property name="specialValueText">
          <string/>
+        </property>
+        <property name="minimum">
+         <number>50</number>
         </property>
         <property name="maximum">
          <number>500</number>

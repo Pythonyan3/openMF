@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from app.openMF.Scene import Scene
 from PyQt5 import QtWidgets
 from app.gui.openMF import UiOpenMFWindow
-from app.gui.NewObjectController import NewObjectWindow
+from app.gui.newObjectController import NewObjectWindow
 
 
 class OpenMFWindow(QtWidgets.QMainWindow):
@@ -15,7 +15,7 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.scene = Scene(self.ui.scene_label.width(), self.ui.scene_label.height())
         self.new_object_window = NewObjectWindow(self.scene)
-        self.is_press = False
+        self.button_pressed = 0
         self.x, self.y = 0, 0
         self.ui.scene_label.resizeEvent = self.labelResizeEvent
         self.ui.rotateXslider.valueChanged.connect(self.rotate)
@@ -31,16 +31,36 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         self.ui.save_action.triggered.connect(self.save_object)
         self.ui.load_action.triggered.connect(self.load_object)
         self.ui.addObject.clicked.connect(self.show_modal)
+        self.new_object_window.closeEvent = self.close_modal
+        self.ui.aroundCenter.clicked.connect(self.camera_rotate_mode_change)
+        self.ui.aroundEye.clicked.connect(self.camera_rotate_mode_change)
+        self.ui.eye_set.clicked.connect(self.eye_set)
+        self.ui.center_set.clicked.connect(self.center_set)
+        self.ui.rasterize_scene.triggered.connect(self.rasterize_scene)
 
     def rotate(self, deg: int):
         sender = self.sender()
         if sender.objectName() == 'rotateXslider':
             self.scene.rotate_object(deg, 'x')
-            self.scene.camera.rotate_camera()
         if sender.objectName() == 'rotateYslider':
             self.scene.rotate_object(deg, 'y')
         if sender.objectName() == 'rotateZslider':
             self.scene.rotate_object(deg, 'z')
+        self.redraw()
+
+    def camera_rotate_mode_change(self):
+        self.scene.camera.around_center = self.ui.aroundCenter.isChecked()
+
+    def eye_set(self):
+        self.scene.camera.eye.point[0] = self.ui.eye_x.value()
+        self.scene.camera.eye.point[1] = self.ui.eye_y.value()
+        self.scene.camera.eye.point[2] = self.ui.eye_z.value()
+        self.redraw()
+
+    def center_set(self):
+        self.scene.camera.center.point[0] = self.ui.center_x.value()
+        self.scene.camera.center.point[1] = self.ui.center_y.value()
+        self.scene.camera.center.point[2] = self.ui.center_z.value()
         self.redraw()
 
     def scale(self):
@@ -77,6 +97,11 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         qimage = ImageQt(self.scene.image).rgbSwapped().rgbSwapped()
         self.ui.scene_label.setPixmap(QPixmap.fromImage(qimage))
 
+    def rasterize_scene(self):
+        self.scene.render(False)
+        qimage = ImageQt(self.scene.image).rgbSwapped().rgbSwapped()
+        self.ui.scene_label.setPixmap(QPixmap.fromImage(qimage))
+
     def wheelEvent(self, *args, **kwargs):
         delta = 1 if args[0].angleDelta().y() > 0 else -1
         self.scene.camera.fov -= delta
@@ -86,11 +111,12 @@ class OpenMFWindow(QtWidgets.QMainWindow):
 
     def mouse_press(self, event):
         self.ui.scene_label.setCursor(QCursor(Qt.ClosedHandCursor))
-        self.is_press = True
+        self.button_pressed = event.button()
 
     def mouse_release(self, event):
         self.ui.scene_label.setCursor(QCursor(Qt.ArrowCursor))
         self.x, self.y = 0, 0
+        self.button_pressed = 0
 
     def mouse_move(self, *args, **kwargs):
         if self.x == 0 and self.y == 0:
@@ -98,10 +124,19 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         dx, dy = args[0].x() - self.x, args[0].y() - self.y
         if dx != 0 or dy != 0:
             self.x, self.y = args[0].x(), args[0].y()
-        #self.scene.camera.yaw += dx * 0.01
-        #self.scene.camera.pitch += dy * 0.01
-        self.scene.camera.rotate_y += dx
-        self.scene.camera.rotate_x -= dy
+        if self.button_pressed == 4:
+            self.scene.camera.rotate_y -= dx
+            self.scene.camera.rotate_x += dy
+        elif self.button_pressed == 1:
+            dx, dy = dx * 0.5, dy * 0.5
+            self.scene.camera.move(dx, dy, dx, dy)
+        self.ui.eye_x.setValue(self.scene.camera.eye.x)
+        self.ui.eye_y.setValue(self.scene.camera.eye.y)
+        self.ui.eye_z.setValue(self.scene.camera.eye.z)
+        self.ui.center_x.setValue(self.scene.camera.center.x)
+        self.ui.center_y.setValue(self.scene.camera.center.y)
+        self.ui.center_z.setValue(self.scene.camera.center.z)
+        self.scene.camera.rotate()
         self.redraw()
 
     def labelResizeEvent(self, *args, **kwargs):
@@ -112,10 +147,9 @@ class OpenMFWindow(QtWidgets.QMainWindow):
     def show_modal(self):
         self.new_object_window.show()
 
-    def update_objects_list(self):
+    def close_modal(self, *args, **kwargs):
         self.ui.objectsBox.clear()
         self.ui.objectsBox.addItems(self.scene.objects.keys())
-        self.redraw()
 
     def save_object(self):
         if len(self.scene.objects):
@@ -135,4 +169,5 @@ class OpenMFWindow(QtWidgets.QMainWindow):
             if not self.scene.load_object(filename):
                 QMessageBox.information(self, 'Внимание!', 'Не удалось прочитать файл!')
             else:
-                self.update_objects_list()
+                self.ui.objectsBox.clear()
+                self.ui.objectsBox.addItems(self.scene.objects.keys())
