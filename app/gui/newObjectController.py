@@ -41,11 +41,14 @@ class NewObjectWindow(QtWidgets.QMainWindow):
         tower_top_size, tower_bot_size = self.ui.top_tower_size.value(), self.ui.bottom_tower_size.value()
         tower_height = self.ui.tower_height.value()
         hat_count, hat_size = self.ui.hats_count.value(), self.ui.tower_hat_size.value()
-        if tower_top_size > tower_bot_size:
+        if tower_top_size >= tower_bot_size:
             self.message('Размер верхнего основания башни, должно быть меньше размеров нижнего основания башни!')
             return False
         if hat_count > 0 and hat_size < tower_top_size:
             self.message('Размер блока верхушки башни, должен быть больше размера верхнего основания башни!')
+            return False
+        if tower_bot_size > width * (2/3) or tower_bot_size > length * (2/3):
+            self.message('Размер нижнего основания башни, должен быть меньше ширины и длины основания!')
             return False
         return {'width': width, 'height': height, 'length': length, 'c_count': c_count, 'c_height': c_height,
                 'tower_top_size': tower_top_size, 'tower_bot_size': tower_bot_size, 'tower_height': tower_height,

@@ -36,7 +36,7 @@ class MFObject(Shape):
             new_obj.append(Cylinder.Cylinder(column_x, column_y, column_z, 2, kwargs['c_height']))
             column_z += step
         bridge_y = column_y + kwargs['c_height'] / 2 + 2
-        bridge_width = (kwargs['tower_bot_size'] - kwargs['tower_top_size']) * (bridge_y/kwargs['tower_height']) + stair_width + 2
+        bridge_width = (kwargs['tower_bot_size'] - kwargs['tower_top_size']) * ((bridge_y/kwargs['tower_height'])*3) + stair_width + 2
         bridge_length = kwargs['tower_top_size'] - 3    # Bridge
         new_obj.append(Box.Box(0, bridge_y, 0, bridge_width, 5, bridge_length))
 

@@ -1,5 +1,5 @@
 import math
-from PIL import Image, ImageDraw
+from PIL import Image
 from app.openMF.Shapes.Point import Point
 from app.openMF.Shapes.Shape import Shape
 from app.openMF.Shapes.Triangle import Triangle
@@ -16,8 +16,6 @@ class Cylinder(Shape):
 
     def triangles(self):
         img = Image.new('RGB', (800, 800), 'black')
-        canvas = img.load()
-        draw = ImageDraw.Draw(img)
         triangles = list()
         points = []
         half_height = self.height/2

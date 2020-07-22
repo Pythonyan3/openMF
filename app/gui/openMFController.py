@@ -125,8 +125,9 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         if dx != 0 or dy != 0:
             self.x, self.y = args[0].x(), args[0].y()
         if self.button_pressed == 4:
-            self.scene.camera.rotate_y -= dx
+            self.scene.camera.rotate_y += dx
             self.scene.camera.rotate_x += dy
+            self.scene.camera.rotate()
         elif self.button_pressed == 1:
             dx, dy = dx * 0.5, dy * 0.5
             self.scene.camera.move(dx, dy, dx, dy)
@@ -136,7 +137,6 @@ class OpenMFWindow(QtWidgets.QMainWindow):
         self.ui.center_x.setValue(self.scene.camera.center.x)
         self.ui.center_y.setValue(self.scene.camera.center.y)
         self.ui.center_z.setValue(self.scene.camera.center.z)
-        self.scene.camera.rotate()
         self.redraw()
 
     def labelResizeEvent(self, *args, **kwargs):

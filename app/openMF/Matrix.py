@@ -4,11 +4,11 @@ import numpy as np
 
 class Matrix:
     @staticmethod
-    def tranlsation_matrix(x: float, y: float, z: float):
+    def translation_matrix(dx: float, dy: float, dz: float):
         return np.array([[1, 0, 0, 0],
                          [0, 1, 0, 0],
                          [0, 0, 1, 0],
-                         [x, y, z, 1]])
+                         [dx, dy, dz, 1]])
 
     @staticmethod
     def scale_matrix(scale_x: float, scale_y: float, scale_z: float):
@@ -59,16 +59,16 @@ class Matrix:
 
     @staticmethod
     def perspective_matrix(fov: float, aspect: float, near: float, far: float):
-        yScale = 1/math.tan(math.radians(fov)/2)
-        xScale = yScale/aspect
-        return np.array([[xScale, 0, 0, 0],
-                         [0, yScale, 0, 0],
-                         [0, 0, (far+near)/(far-near), 1],
-                         [0, 0, -2*near*far/(far-near),  0]])
+        scale_y = 1/math.tan(math.radians(fov/2))
+        scale_x = scale_y/aspect
+        return np.array([[scale_x, 0, 0, 0],
+                         [0, scale_y, 0, 0],
+                         [0, 0, far/(far-near), 1],
+                         [0, 0, -near*far/(far-near),  0]])
 
     @staticmethod
     def look_at_matrix(eye, center):
-        sub = center - eye
+        sub = eye - center
         forward = sub.point / np.linalg.norm(sub.point)
         right = np.cross(np.array([0, 1, 0]), forward)
         right = right / np.linalg.norm(right)
@@ -77,17 +77,3 @@ class Matrix:
                          [right[1], up[1], forward[1], 0],
                          [right[2], up[2], forward[2], 0],
                          [-right.dot(eye.point), -up.dot(eye.point), -forward.dot(eye.point), 1]])
-
-    @staticmethod
-    def sec_look_at_matrix(eye, pitch, yaw):
-        cos_pitch = math.cos(pitch)
-        sin_pitch = math.sin(pitch)
-        cos_yaw = math.cos(yaw)
-        sin_yaw = math.sin(yaw)
-        xaxis = np.array([cos_yaw, 0, -sin_yaw])
-        yaxis = np.array([sin_yaw*sin_pitch, cos_pitch, cos_yaw*sin_pitch])
-        zaxis = np.array([sin_yaw*cos_pitch, -sin_pitch, cos_yaw * cos_pitch])
-        return np.array([[xaxis[0], xaxis[1], xaxis[2], -xaxis.dot(eye.point)],
-                         [yaxis[0], yaxis[1], yaxis[2], -yaxis.dot(eye.point)],
-                         [zaxis[0], zaxis[1], zaxis[2], -zaxis.dot(eye.point)],
-                         [0, 0, 0, 1]])

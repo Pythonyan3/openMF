@@ -59,76 +59,48 @@ class Scene:
             self.selected_obj.z = z
 
     def render(self, is_line=True):
-        if is_line:
-            self.line_render()
-        else:
-            self.fill_render()
-
-    def fill_render(self):
-        self.image = Image.new('RGB', (self.width, self.height), 'black')
-        self.canvas = self.image.load()
-        projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
-                                               self.camera.far)
-        look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
-        z_buffer = [-math.inf for _ in range(self.width * self.height)]
-        for obj in self.objects.values():
-            color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
-            obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
-            obj_translate = Matrix.tranlsation_matrix(obj.x, obj.y, obj.z)
-            obj_scale = Matrix.scale_matrix(obj.scale_x, obj.scale_y, obj.scale_z)
-            if isinstance(obj, MFObject.MFObject):
-                for shape in obj.shapes:
-                    rotate = Matrix.rotate(shape.rotate_x, shape.rotate_y, shape.rotate_z)
-                    translate = Matrix.tranlsation_matrix(shape.x, shape.y, shape.z)
-                    scale = Matrix.scale_matrix(shape.scale_x, shape.scale_y, shape.scale_z)
-                    triangles = shape.triangles()
-                    for t in triangles:
-                        model = scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate)
-                        tt = t * (model.dot(look).dot(projection))
-                        self.new_fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, z_buffer, color)
-            else:
-                triangles = obj.triangles()
-                for t in triangles:
-                    model = (obj_scale.dot(obj_rotate).dot(obj_translate))
-                    tt = t * (model.dot(look).dot(projection))
-                    self.new_fill_triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, z_buffer, color)
-
-    def line_render(self):
         self.image = Image.new('RGB', (self.width, self.height), 'black')
         self.canvas = self.image.load()
         projection = Matrix.perspective_matrix(self.camera.fov, self.width / self.height, self.camera.near,
                                                self.camera.far)
         look = Matrix.look_at_matrix(self.camera.eye, self.camera.center)
         viewport = Matrix.viewport_matrix(self.width, self.height)
+        z_buffer = [-math.inf for _ in range(self.width * self.height)]
         for obj in self.objects.values():
             color = (153, 204, 255) if obj == self.selected_obj else (255, 255, 255)
             obj_rotate = Matrix.rotate(obj.rotate_x, obj.rotate_y, obj.rotate_z)
-            obj_translate = Matrix.tranlsation_matrix(obj.x, obj.y, obj.z)
+            obj_translate = Matrix.translation_matrix(obj.x, obj.y, obj.z)
             obj_scale = Matrix.scale_matrix(obj.scale_x, obj.scale_y, obj.scale_z)
             if isinstance(obj, MFObject.MFObject):
                 for shape in obj.shapes:
                     rotate = Matrix.rotate(shape.rotate_x, shape.rotate_y, shape.rotate_z)
-                    translate = Matrix.tranlsation_matrix(shape.x, shape.y, shape.z)
+                    translate = Matrix.translation_matrix(shape.x, shape.y, shape.z)
                     scale = Matrix.scale_matrix(shape.scale_x, shape.scale_y, shape.scale_z)
                     triangles = shape.triangles()
                     for t in triangles:
                         model = scale.dot(rotate).dot(translate).dot(obj_scale).dot(obj_rotate).dot(obj_translate)
-                        tt = t * (model.dot(look).dot(projection))
-                        self.line(tt.a.x, tt.a.y, tt.b.x, tt.b.y, color)
-                        self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
-                        self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
+                        tt = t * (model.dot(look).dot(projection)) * viewport
+                        if is_line:
+                            self.line(tt.a.x, tt.a.y, tt.b.x, tt.b.y, color)
+                            self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
+                            self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
+                        else:
+                            self.triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z,
+                                          z_buffer, color)
             else:
                 triangles = obj.triangles()
                 for t in triangles:
                     model = (obj_scale.dot(obj_rotate).dot(obj_translate))
-                    tt = t * (model.dot(look).dot(projection))
-                    self.line(tt.a.x, tt.a.y, tt.b.x, tt.b.y, color)
-                    self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
-                    self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
+                    tt = t * (model.dot(look).dot(projection)) * viewport
+                    if is_line:
+                        self.line(tt.a.x, tt.a.y, tt.b.x, tt.b.y, color)
+                        self.line(tt.b.x, tt.b.y, tt.c.x, tt.c.y, color)
+                        self.line(tt.a.x, tt.a.y, tt.c.x, tt.c.y, color)
+                    else:
+                        self.triangle(tt.a.x, tt.a.y, tt.a.z, tt.b.x, tt.b.y, tt.b.z, tt.c.x, tt.c.y, tt.c.z, z_buffer, color)
 
-    def new_fill_triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, z_buffer, color=(255, 255, 255)):
-        x0, x1, x2 = self.width / 2 + x0, self.width / 2 + x1, self.width / 2 + x2
-        y0, y1, y2 = self.height-1-(self.height / 2 + y0), self.height-1-(self.height / 2 + y1), self.height-1-(self.height / 2 + y2)
+    def triangle(self, x0: float, y0: float, z0: float, x1: float, y1: float, z1: float, x2: float, y2: float, z2: float, z_buffer, color=(255, 255, 255)):
+        y0, y1, y2 = self.height - 1 - y0, self.height - 1 - y1, self.height - 1 - y2
         minX = int(max(0, math.ceil(min(x0, min(x1, x2)))))
         maxX = int(min(self.width-1, math.floor(max(x0, max(x1, x2)))))
         minY = int(max(0, math.ceil(min(y0, min(y1, y2)))))
@@ -159,8 +131,7 @@ class Scene:
                 y += 1
 
     def line(self, x0: float, y0: float, x1: float, y1: float, color=(255, 255, 255)):
-        x0, x1 = self.width / 2 + x0, self.width / 2 + x1
-        y0, y1 = self.height - 1 - (self.height / 2 + y0), self.height - 1 - (self.height / 2 + y1)
+        y0, y1 = self.height - 1 - y0, self.height - 1 - y1
         steep = False
         if abs(x0 - x1) < abs(y0 - y1):
             steep = True
@@ -193,14 +164,14 @@ class Scene:
             file.write(f'camera-rotate: {self.camera.rotate_x} {self.camera.rotate_y}\n')
             for name, obj in self.objects.items():
                 if isinstance(obj, MFObject.MFObject):
-                    file.write(obj.__class__.__name__ + ' ' + name + ' ' + str(len(obj)) + '\n')
+                    file.write(obj.__class__.__name__ + ' ' + name + '\n')
                     file.write(obj.get_modifications())
                     for shape in obj.shapes:
-                        file.write(shape.__class__.__name__ + ' ' + name + ' 1\n')
+                        file.write(shape.__class__.__name__ + ' ' + name + '\n')
                         file.write(shape.get_params())
                         file.write(shape.get_modifications())
                 else:
-                    file.write(obj.__class__.__name__ + ' ' + name + ' 1\n')
+                    file.write(obj.__class__.__name__ + ' ' + name + '\n')
                     file.write(obj.get_params())
                     file.write(obj.get_modifications())
 
@@ -220,7 +191,7 @@ class Scene:
                     line = file.readline()
                     if not line:
                         break
-                    class_name, name, count = line.strip('\n').split(' ')
+                    class_name, name= line.strip('\n').split(' ')
                     if class_name == 'MFObject':
                         obj = self.read_object(file)
                         objects3d[name] = obj
@@ -246,7 +217,7 @@ class Scene:
         return obj
 
     def read_shape(self, file, class_name):
-        shape_params = [int(x) for x in file.readline().strip('\n').split(' ')[1:]]
+        shape_params = [int(float(x)) for x in file.readline().strip('\n').split(' ')[1:]]
         x, y, z = file.readline().strip('\n').split(' ')[1:]
         rotate_x, rotate_y, rotate_z = file.readline().strip('\n').split(' ')[1:]
         scale_x, scale_y, scale_z = file.readline().strip('\n').split(' ')[1:]
