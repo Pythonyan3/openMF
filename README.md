@@ -1,10 +1,8 @@
-# :gem: openMF
+# :gem: openMF - 3D objects editor
 
-## 3D Редактор
-
-1. Создание параметризированного объекта;
-2. Рендер объекта в виде каркаса;
-3. Рендер твердотельного объекта;
-4. Выполнение преобразований над объектом (поворот, перемещение, масштабирование);
-5. Реализация работы с камерой;
-6. Сохранение и загрузка сцен.
+1. Creating parameterized objects;
+2. Rendering wireframe objects;
+3. Rendering solid objects;
+4. Performing object transformation (rotate, move, scale);
+5. Implementing editor camera;
+6. Save/Load scenes.
